@@ -87,10 +87,23 @@ class Device(Resource):
         del shelf[identifier]
         return '', 204
 
+class Sinric(Resource):
+    def post(self):
+        parser = reqparse.RequestParser()
+        print("Getting post req")
+        parser.add_argument('email', required=True)
+        parser.add_argument('password', required=True)
+        parser.add_argument('chipid', required=True)
+        
+        # Parse the arguments into an object
+        args = parser.parse_args()
+	print("starting sinric script")
+	os.system("sudo python3 sinric.py")
+        return {'message': 'Device registered', 'data': args}, 201
 
 api.add_resource(DeviceList, '/devices')
 api.add_resource(Device, '/device/<string:identifier>')
-
+api.add_resource(Sinric, '/sinric')
 
 
 
