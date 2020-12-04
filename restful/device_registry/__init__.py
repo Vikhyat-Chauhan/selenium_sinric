@@ -97,8 +97,8 @@ class Sinric(Resource):
         
         # Parse the arguments into an object
         args = parser.parse_args()
-	print("starting sinric script")
-	os.system("sudo python3 sinric.py")
+	    print("starting sinric script")
+	    os.system("sudo python3 sinric.py")
         return {'message': 'Device registered', 'data': args}, 201
 
 api.add_resource(DeviceList, '/devices')
