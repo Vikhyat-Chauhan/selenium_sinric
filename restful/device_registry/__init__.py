@@ -1,7 +1,6 @@
 import markdown
 import os
 import shelve
-
 # Import the framework
 from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
@@ -52,39 +51,45 @@ class DeviceList(Resource):
 
     def post(self):
         parser = reqparse.RequestParser()
+        print(reqparse)
         print("Getting post req")
-        parser.add_argument('identifier', required=True)
-        parser.add_argument('name', required=True)
         parser.add_argument('device_type', required=True)
-        parser.add_argument('controller_gateway', required=True)
-
+        parser.add_argument('device_name', required=False)
+        parser.add_argument('device_codename', required=True)
+        parser.add_argument('device_chipid', required=True)
+        parser.add_argument('device_location', required=False)
+        parser.add_argument('device_relaycount', required=True)
+        parser.add_argument('device_fancount', required=True)
+        parser.add_argument('device_imageurl', required=True)
+        parser.add_argument('user_code', required=True)
+        
         # Parse the arguments into an object
         args = parser.parse_args()
-
+        #print(args)
         shelf = get_db()
-        shelf[args['identifier']] = args
+        shelf[args['device_chipid']] = args
 
         return {'message': 'Device registered', 'data': args}, 201
 
 
 class Device(Resource):
-    def get(self, identifier):
+    def get(self, device_chipid):
         shelf = get_db()
 
         # If the key does not exist in the data store, return a 404 error.
-        if not (identifier in shelf):
+        if not (device_chipid in shelf):
             return {'message': 'Device not found', 'data': {}}, 404
 
-        return {'message': 'Device found', 'data': shelf[identifier]}, 200
+        return {'message': 'Device found', 'data': shelf[device_chipid]}, 200
 
-    def delete(self, identifier):
+    def delete(self, device_chipid):
         shelf = get_db()
 
         # If the key does not exist in the data store, return a 404 error.
-        if not (identifier in shelf):
+        if not (device_chipid in shelf):
             return {'message': 'Device not found', 'data': {}}, 404
 
-        del shelf[identifier]
+        del shelf[device_chipid]
         return '', 204
 
 class Sinric(Resource):
@@ -97,13 +102,12 @@ class Sinric(Resource):
         
         # Parse the arguments into an object
         args = parser.parse_args()
-#	    print("starting sinric script")
-#	    os.system("sudo python3 sinric.py")
+        os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric.py')
         return {'message': 'Sinric script processed', 'data': args}, 201
 
-api.add_resource(DeviceList, '/devices')
-api.add_resource(Device, '/device/<string:identifier>')
-api.add_resource(Sinric, '/sinric')
+api.add_resource(DeviceList, '/devices/')
+api.add_resource(Device, '/device/<string:device_chipid>/')
+api.add_resource(Sinric, '/sinric/')
 
 
 
