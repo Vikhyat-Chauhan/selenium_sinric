@@ -1,4 +1,5 @@
-import time
+import sys
+import json
 import time
 import pandas as pd
 import paho.mqtt.client as paho
@@ -13,10 +14,10 @@ password = "t1n2m3@TNM"
 port = 1883
 
 options = Options()
-options.add_argument('--no-sandbox')
-options.add_argument('--window-size=1420,1080')
-options.add_argument('--headless')
-options.add_argument('--disable-gpu')
+#options.add_argument('--no-sandbox')
+#options.add_argument('--window-size=1420,1080')
+#options.add_argument('--headless')
+#options.add_argument('--disable-gpu')
 options.add_argument('--allow-running-insecure-content')
 options.add_argument('--ignore-certificate-errors')
 #options.binary_location = "/usr/local/bin/"
@@ -98,14 +99,14 @@ def add_device(devicename,devicedescription,devicetype):
     devicedescription_box.send_keys(devicedescription)
     # Select the device type dropdown
     for i in range(0,10,1):
-        time.sleep(0.5)
+        time.sleep(2)
         #print(i)
         if(driver.find_element_by_xpath("//mat-select[@placeholder='Device Type']")):
             break
     devicetype_box = driver.find_element_by_xpath("//mat-select[@placeholder='Device Type']")
     devicetype_box.click()
     for i in range(0,10,1):
-        time.sleep(.5)
+        time.sleep(2)
         #print(i)
         if(driver.find_element_by_xpath("//mat-option[@role='option']")):
             break
@@ -180,26 +181,49 @@ def mqttsend_get_deviceid_list(chipid):
 def on_message(client, userdata, message):
     print("received message =",message.topic + "-->" + str(message.payload.decode("utf-8")))
 
-if __name__ == "__main__":
-    client = paho.Client("server-001") #create client object client1.on_publish = on_publish #assign function to callback client1.connect(broker,port) #establish connection client1.publish("house/bulb1","on")
-    #Bind function to callback
-    client.on_message=on_message
-    #print("connecting to broker ",broker)
-    client.username_pw_set(username,password)#("wbynzcri","uOIqIxMgf3Dl")
-    client.connect(broker,port,60)#connect12233
-    client.loop_start() #start loop to process received messages
-
-    CHIPID = "12121212"
-    CODENAME = "STANDALONE2R2BT"
-    TYPE = "Switch"
-    SWITCH_NUMBER = 2
-    SWITCH_NAME = {"Light", "Fan"}
-
-    login_or_register("name","lastname","name@lastname.com","password")
-    #add_device("SmartDevice","Ye h automated addition","Switch")
-    #for i in SWITCH_NAME:
-     #   add_device(i+"$"+CHIPID,(CODENAME + " TNM Relay Device"),TYPE)
-      #  time.sleep(0.5)
-    mqttsend_apikey(CHIPID)
-    mqttsend_get_deviceid_list(CHIPID)
+def echocredentials_device(username,password,chipid):
+    login_or_register("Firstname","Lastname",username,password)
+    mqttsend_apikey(chipid)
+    mqttsend_get_deviceid_list(chipid)
     driver.close()
+
+def add_new_device(username,password,chipid,switches):
+    login_or_register("Firstname","Lastname",username,password)
+    print(switches)
+    for i in switches:
+        add_device(str(i)+"$"+chipid,("TNM Relay Device"),TYPE)
+        time.sleep(0.5)
+    mqttsend_apikey(chipid)
+    mqttsend_get_deviceid_list(chipid)
+    driver.close()
+
+client = paho.Client("server-001") #create client object client1.on_publish = on_publish #assign function to callback client1.connect(broker,port) #establish connection client1.publish("house/bulb1","on")
+#Bind function to callback
+client.on_message=on_message
+#print("connecting to broker ",broker)
+client.username_pw_set(username,password)#("wbynzcri","uOIqIxMgf3Dl")
+client.connect(broker,port,60)#connect12233
+client.loop_start() #start loop to process received messages
+print("Started MQTT Communication")
+
+CHIPID = "12121212"
+CODENAME = "STANDALONE2R2BT"
+TYPE = "Switch"
+SWITCH_NUMBER = 0
+SWITCH_NAME = {"Light", "Fan"}
+
+email = sys.argv[1]
+password = sys.argv[2]
+chipid = sys.argv[3]
+codename = sys.argv[4]
+switches = []
+for i in range(5,len(sys.argv),1):
+    print(sys.argv[i]) 
+    switches.append(sys.argv[i])
+#echocredentials_device(json_file["email"],json_file["password"],json_file["chipid"])
+add_new_device(email,password,chipid,switches)
+
+    
+
+
+

@@ -13,14 +13,15 @@ password = "t1n2m3@TNM"
 port = 1883
 
 options = Options()
-options.add_argument('--no-sandbox')
-options.add_argument('--window-size=1420,1080')
-options.add_argument('--headless')
-options.add_argument('--disable-gpu')
+#options.add_argument('--no-sandbox')
+#options.add_argument('--window-size=1420,1080')
+#options.add_argument('--headless')
+#options.add_argument('--disable-gpu')
 options.add_argument('--allow-running-insecure-content')
 options.add_argument('--ignore-certificate-errors')
 #options.binary_location = "/usr/local/bin/"
 driver = webdriver.Chrome(chrome_options=options)
+driver.close()
 
 def login(email,password):
     driver.get("https://www.sinric.com")
@@ -180,26 +181,37 @@ def mqttsend_get_deviceid_list(chipid):
 def on_message(client, userdata, message):
     print("received message =",message.topic + "-->" + str(message.payload.decode("utf-8")))
 
-if __name__ == "__main__":
-    client = paho.Client("server-001") #create client object client1.on_publish = on_publish #assign function to callback client1.connect(broker,port) #establish connection client1.publish("house/bulb1","on")
-    #Bind function to callback
-    client.on_message=on_message
-    #print("connecting to broker ",broker)
-    client.username_pw_set(username,password)#("wbynzcri","uOIqIxMgf3Dl")
-    client.connect(broker,port,60)#connect12233
-    client.loop_start() #start loop to process received messages
 
-    CHIPID = "12121212"
-    CODENAME = "STANDALONE2R2BT"
-    TYPE = "Switch"
-    SWITCH_NUMBER = 2
-    SWITCH_NAME = {"Light", "Fan"}
+client = paho.Client("server-001") #create client object client1.on_publish = on_publish #assign function to callback client1.connect(broker,port) #establish connection client1.publish("house/bulb1","on")
+#Bind function to callback
+client.on_message=on_message
+#print("connecting to broker ",broker)
+client.username_pw_set(username,password)#("wbynzcri","uOIqIxMgf3Dl")
+client.connect(broker,port,60)#connect12233
+client.loop_start() #start loop to process received messages
+print("Started MQTT Communication")
 
-    login_or_register("name","lastname","name@lastname.com","password")
-    #add_device("SmartDevice","Ye h automated addition","Switch")
-    #for i in SWITCH_NAME:
-     #   add_device(i+"$"+CHIPID,(CODENAME + " TNM Relay Device"),TYPE)
-      #  time.sleep(0.5)
-    mqttsend_apikey(CHIPID)
-    mqttsend_get_deviceid_list(CHIPID)
+CHIPID = "12121212"
+CODENAME = "STANDALONE2R2BT"
+TYPE = "Switch"
+SWITCH_NUMBER = 0
+SWITCH_NAME = {"Light", "Fan"}
+
+def echocredentials_device(username,password,chipid):
+    driver = webdriver.Chrome(chrome_options=options)
+    login_or_register("Firstname","Lastname",username,password)
+    mqttsend_apikey(chipid)
+    mqttsend_get_deviceid_list(chipid)
     driver.close()
+
+def add_device(username,password,chipid):
+    driver = webdriver.Chrome(chrome_options=options)
+    login_or_register("Firstname","Lastname",username,password)
+    for i in switches:
+        add_device(i+"$"+chipid,(CODENAME + " TNM Relay Device"),TYPE)
+        time.sleep(0.5)
+    mqttsend_apikey(chipid)
+    mqttsend_get_deviceid_list(chipid)
+    driver.close()
+
+
