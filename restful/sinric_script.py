@@ -14,10 +14,10 @@ password = "t1n2m3@TNM"
 port = 1883
 
 options = Options()
-#options.add_argument('--no-sandbox')
-#options.add_argument('--window-size=1420,1080')
-#options.add_argument('--headless')
-#options.add_argument('--disable-gpu')
+options.add_argument('--no-sandbox')
+options.add_argument('--window-size=1420,1080')
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
 options.add_argument('--allow-running-insecure-content')
 options.add_argument('--ignore-certificate-errors')
 #options.binary_location = "/usr/local/bin/"
@@ -67,6 +67,7 @@ def get_deviceid_list(chipid):
         #print(chip)
         #print(type)
         #print(id)
+    print(output_list)
     return output_list
 
 def add_device(devicename,devicedescription,devicetype):
@@ -99,14 +100,14 @@ def add_device(devicename,devicedescription,devicetype):
     devicedescription_box.send_keys(devicedescription)
     # Select the device type dropdown
     for i in range(0,10,1):
-        time.sleep(2)
+        time.sleep(1)
         #print(i)
         if(driver.find_element_by_xpath("//mat-select[@placeholder='Device Type']")):
             break
     devicetype_box = driver.find_element_by_xpath("//mat-select[@placeholder='Device Type']")
     devicetype_box.click()
     for i in range(0,10,1):
-        time.sleep(2)
+        time.sleep(1)
         #print(i)
         if(driver.find_element_by_xpath("//mat-option[@role='option']")):
             break
@@ -117,7 +118,7 @@ def add_device(devicename,devicedescription,devicetype):
     all_button = driver.find_elements_by_tag_name('button')
     # Click Save Button
     all_button[0].click()
-    time.sleep(2)
+    time.sleep(1)
     
 
 def register(firstname,lastname,email,password):
@@ -169,13 +170,13 @@ def login_or_register(firstname,lastname,email,password):
 
 
 def mqttsend_apikey(chipid):
-    client.publish(str(chipid)+'ESP/system/sinricapi/',get_apikey(),0,False)
+    client.publish(str(chipid)+'ESP/system/sinricapi/',get_apikey(),0,True)
 
 def mqttsend_get_deviceid_list(chipid):
-    devices_ids = get_deviceid_list(CHIPID)
+    devices_ids = get_deviceid_list(chipid)
     for i in range(0,len(devices_ids),1):
-        #print(devices_ids[i])
-        client.publish(str(chipid)+"ESP/system/relay/"+str(i+1)+"/sinricid/",devices_ids[i],0,False)
+        print(devices_ids[i])
+        client.publish(str(chipid)+"ESP/system/sinricrelayid/"+str(i+1)+"/",devices_ids[i],0,True)
 
 #define callback
 def on_message(client, userdata, message):
@@ -191,7 +192,7 @@ def add_new_device(username,password,chipid,switches):
     login_or_register("Firstname","Lastname",username,password)
     print(switches)
     for i in switches:
-        add_device(str(i)+"$"+chipid,("TNM Relay Device"),TYPE)
+        add_device(str(i)+"$"+chipid,("TNM Relay Device"),"Switch")
         time.sleep(0.5)
     mqttsend_apikey(chipid)
     mqttsend_get_deviceid_list(chipid)
@@ -206,19 +207,13 @@ client.connect(broker,port,60)#connect12233
 client.loop_start() #start loop to process received messages
 print("Started MQTT Communication")
 
-CHIPID = "12121212"
-CODENAME = "STANDALONE2R2BT"
-TYPE = "Switch"
-SWITCH_NUMBER = 0
-SWITCH_NAME = {"Light", "Fan"}
-
 email = sys.argv[1]
 password = sys.argv[2]
 chipid = sys.argv[3]
 codename = sys.argv[4]
 switches = []
 for i in range(5,len(sys.argv),1):
-    print(sys.argv[i]) 
+   # print(sys.argv[i]) 
     switches.append(sys.argv[i])
 #echocredentials_device(json_file["email"],json_file["password"],json_file["chipid"])
 add_new_device(email,password,chipid,switches)
