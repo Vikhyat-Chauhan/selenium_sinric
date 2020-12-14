@@ -70,6 +70,27 @@ def get_deviceid_list(chipid):
     print(output_list)
     return output_list
 
+def del_device_list(chipid):
+    #Prerequest is that you must be on the logged in, hence call after login(email,password) function
+    x = 2
+    time.sleep(5)
+    while(1):
+        device_name = driver.find_elements_by_xpath("//mat-card[@class='device-card side mat-card']/mat-card-header[@class='mat-card-header']//mat-card-title[@class='mat-card-title']")
+        device_delete_button = driver.find_elements_by_xpath("//mat-card[@class='device-card side mat-card']/mat-card-actions[@class='mat-card-actions']//button[@class='mat-icon-button mat-primary']")
+        if(len(device_name)<2):
+            break
+        if(x == len(device_name)):
+            break
+        details = (device_name[x].text).split('$') #lets spilit html text the device_name which is seprated by Name$CHIPID (Switch)
+        name = details[0]
+        chip = ((details[1]).split(' '))[0] #Getting Chipid from CHIPID (Switch)
+        if(chip == chipid):
+            print("Deleting " + name + " with Chipid " + chip)
+            device_delete_button[(x-2)*2].click()
+            time.sleep(5)
+            x=x-1
+        x=x+1
+
 def add_device(devicename,devicedescription,devicetype):
     #Prerequest is that you must be on the logged in, hence call after login(email,password) function
     for i in range(0,10,1):
@@ -150,6 +171,7 @@ def register(firstname,lastname,email,password):
     all_button[0].click()
     
 def login_or_register(firstname,lastname,email,password):
+    print("Trying to Login or Register with credential : "+email+" & "+password)
     login(email,password)
     # Wait till we find friendly name element
     for i in range(0,10,1):
@@ -164,9 +186,8 @@ def login_or_register(firstname,lastname,email,password):
         login(email,password)
     else:
         time.sleep(1)
-        #print("Logged in successful, do your task")
+        print("Logged in successfully")
     #perform your logged in tasks here
-    #mqttsend_apikey("12121212")
 
 
 def mqttsend_apikey(chipid):
@@ -191,6 +212,7 @@ def echocredentials_device(username,password,chipid):
 def add_new_device(username,password,chipid,switches):
     login_or_register("Firstname","Lastname",username,password)
     print(switches)
+    del_device_list(chipid)
     for i in switches:
         add_device(str(i)+"$"+chipid,("TNM Relay Device"),"Switch")
         time.sleep(0.5)
@@ -213,11 +235,11 @@ chipid = sys.argv[3]
 codename = sys.argv[4]
 switches = []
 for i in range(5,len(sys.argv),1):
-   # print(sys.argv[i]) 
+    print(sys.argv[i]) 
     switches.append(sys.argv[i])
 #echocredentials_device(json_file["email"],json_file["password"],json_file["chipid"])
 add_new_device(email,password,chipid,switches)
-
+#login_or_register("name","lastname","opschauhan1954@gmail.com","TNMcz0Qh7")
     
 
 

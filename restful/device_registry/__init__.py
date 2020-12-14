@@ -94,7 +94,6 @@ class Device(Resource):
 
 class Sinric(Resource):
     def post(self):
-        print(reqparse)
         parser = reqparse.RequestParser()
         print("Getting post req")
         parser.add_argument('email', required=True)
@@ -110,15 +109,44 @@ class Sinric(Resource):
         args = parser.parse_args()
 
         if(args["switch5"] is not None):
-            os.system('sudo python3 ~/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"]+' '+args["switch4"]+' '+args["switch5"])
+            args["switch5"] = args["switch5"].replace(" ", "_")
+            args["switch4"] = args["switch4"].replace(" ", "_")
+            args["switch3"] = args["switch3"].replace(" ", "_")
+            args["switch2"] = args["switch2"].replace(" ", "_")
+            args["switch1"] = args["switch1"].replace(" ", "_")
+            os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"]+' '+args["switch4"]+' '+args["switch5"])
         elif(args["switch4"] is not None):
-            os.system('sudo python3 ~/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"]+' '+args["switch4"])
+            args["switch4"] = args["switch4"].replace(" ", "_")
+            args["switch3"] = args["switch3"].replace(" ", "_")
+            args["switch2"] = args["switch2"].replace(" ", "_")
+            args["switch1"] = args["switch1"].replace(" ", "_")
+            os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"]+' '+args["switch4"])
         elif(args["switch3"] is not None):
-            os.system('sudo python3 ~/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"])
+            args["switch3"] = args["switch3"].replace(" ", "_")
+            args["switch2"] = args["switch2"].replace(" ", "_")
+            args["switch1"] = args["switch1"].replace(" ", "_")
+            os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"]+' '+args["switch3"])
         elif(args["switch2"] is not None):
-            os.system('sudo python3 ~/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"])
+            args["switch2"] =  args["switch2"].replace(" ", "_")
+            args["switch1"] = args["switch1"].replace(" ", "_")
+            os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"]+' '+args["switch2"])
         else:
-            os.system('sudo python3 ~/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"])        
+            args["switch1"] = args["switch1"].replace(" ", "_")
+            os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"]+' '+args["switch1"])        
+        return {'message': 'Sinric script processed', 'data': args}, 201
+
+    def delete(self):
+        print(reqparse)
+        parser = reqparse.RequestParser()
+        print("Getting del req")
+        parser.add_argument('email', required=True)
+        parser.add_argument('password', required=True)
+        parser.add_argument('chipid', required=True)
+        parser.add_argument('codename',required=True)
+        # Parse the arguments into an object
+        args = parser.parse_args()
+
+        os.system('sudo python3 ~/Documents/Github/selenium_sinric/restful/sinric_script.py '+args['email']+' '+args['password']+' '+args["chipid"]+' '+args["codename"])
         return {'message': 'Sinric script processed', 'data': args}, 201
 
 api.add_resource(DeviceList, '/devices/')
